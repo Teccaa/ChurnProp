@@ -1,0 +1,18 @@
+library(ChurnProb)
+
+#Set working directory
+setwd("C:\\Users\\Remo_\\Dropbox\\Ausbildungen\\UZH\\Master\\FS23\\R - a non-technical introduction to big data techniques, team work and interactive visualization with\\day5")
+setwd("C:\\Users\\Remo_\\OneDrive\\Dokumente\\ChurnProb")
+
+#Read in the Data
+d_customer <- fread("data_customer.csv")
+d_personal <- fread("data_personal.csv")
+
+#Merge the Data
+final_data <- merge(d_customer, d_personal, by="CustomerId",all=TRUE)
+
+#Set columns as factors
+final_data[, c("Exited", "Gender")] <- lapply(final_data[, c("Exited", "Gender")], as.factor)
+
+
+ChurnProb(final_data, 15653251)

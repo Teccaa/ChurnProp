@@ -1,0 +1,107 @@
+rm(list=ls())
+
+
+#Set working directory
+setwd("C:\\Users\\Remo_\\Dropbox\\Ausbildungen\\UZH\\Master\\FS23\\R - a non-technical introduction to big data techniques, team work and interactive visualization with\\day5")
+
+#Load the packages
+library(data.table)
+library(lubridate)
+library(shiny)
+library(rsconnect)
+library(leaflet)
+library(shinythemes)
+library(profvis)
+library(microbenchmark)
+library(fastmatch)
+library(compiler)
+library(CalculateRFM)
+
+#Read in the Data
+d_customer <- fread("data_customer.csv")
+d_personal <- fread("data_personal.csv")
+
+#Merge the Data
+final_data <- merge(d_customer, d_personal, by="CustomerId",all=TRUE)
+
+#Set columns as factors
+final_data[, c("Exited", "Gender")] <- lapply(final_data[, c("Exited", "Gender")], as.factor)
+
+#Summary
+str(final_data)
+summary(final_data)
+
+#Churn Probability 
+glm_churn <- glm(Exited ~ CreditScore + Gender + Age + Tenure + Balance + 
+                   NumOfProducts + HasCrCard + IsActiveMember + EstimatedSalary,
+                 data= final_data, family="binomial")
+#New Column
+final_data$Churn <- predict(glm_churn, final_data, type="response")
+
+
+final_data[, max(Churn), CustomerId]
+final_data[Churn== max(final_data$Churn), list(CustomerId, Churn)]
+
+#Customer with highest and lowest Churn probability
+ex_churn <- function(x){
+  max <- final_data[Churn== max(final_data$Churn), list(CustomerId, Churn)]
+  min <- final_data[Churn== min(final_data$Churn), list(CustomerId, Churn)]
+  
+  results <- list(max, min)
+  return(results)
+}
+
+ex_churn(final_data)
+
+#Average Churn probability by Gender
+final_data[, mean(Churn), by="Gender"]
+
+
+
+exists(15653251, final_data)
+
+
+
+
+15653251 %in% final_data$CustomerId
+print("1")
+
+#Function
+
+Churn_prob <- function(Data, Cust_id){
+  #Check if CustomerId exists
+  if (Cust_id %in% final_data$CustomerId ==FALSE){
+    stop("The CustomerId you provided is not in the dataset")
+  }
+  #GLM 
+  glm_churn <- glm(Exited ~ CreditScore + Gender + Age + Tenure + Balance + 
+                     NumOfProducts + HasCrCard + IsActiveMember + EstimatedSalary,
+                   data= Data, family="binomial")
+  
+  
+  Data$Churn <- predict(glm_churn, Data, type="response")
+  
+  prob <- predict(glm_churn, Data[CustomerId==Cust_id], type="response")
+  
+  results <- data.frame("CustomerId"=Cust_id, "Churn_Prob"=prob)
+  print(results)
+  return(results)
+  
+}
+
+
+Churn_prob(final_data, 15653251)
+
+predict(glm_churn, final_data[CustomerId==15653251], type="response")
+
+glm_churn <- glm(Exited ~ CreditScore + Gender + Age + Tenure + Balance + 
+                   NumOfProducts + HasCrCard + IsActiveMember + EstimatedSalary,
+                 data= final_data, family="binomial")
+
+
+final_data$Churn <- predict(glm_churn, final_data, type="response")
+
+prob <- predict(glm_churn, final_data[CustomerId==15653251], type="response")
+
+results <- data.frame("CustomerId"=15653251, "Churn_Prob"=prob)
+print(results)

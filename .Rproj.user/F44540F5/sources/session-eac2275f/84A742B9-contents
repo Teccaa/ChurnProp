@@ -1,0 +1,14 @@
+Package: ChurnProb
+Type: Package
+Title: Calculate the Churn Probability of a given Customer ID
+Version: 0.1.0
+Author: Remo Bruhin
+Maintainer: The package maintainer <remo.bruhin@uzh.ch>
+Description: The function takes the dataset and a Customer Id as input and return the churn probability for the given customer
+License: What license is it under?
+Depends: R (>= 3.0.1), data.table
+Encoding: UTF-8
+LazyData: true
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
